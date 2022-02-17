@@ -9,7 +9,7 @@ import argparse
 import os
 import sys
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
+sys.path.append(f'{os.path.dirname(os.path.abspath(__file__))}/..')
 
 from lib.config import s3_config
 from lib.util import boto_path_dirs

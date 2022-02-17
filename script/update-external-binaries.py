@@ -27,8 +27,7 @@ def parse_args():
 
 def parse_config():
   with open(CONFIG_PATH, 'r') as config_file:
-    config = json.load(config_file)
-    return config
+    return json.load(config_file)
 
 
 def main():
@@ -76,7 +75,7 @@ def is_updated(config_hash_path):
   except IOError as e:
     if e.errno != errno.ENOENT:
       raise
-  return not sha256(CONFIG_PATH) == existing_hash
+  return sha256(CONFIG_PATH) != existing_hash
 
 
 def binary_should_be_downloaded(binary):
@@ -100,8 +99,7 @@ def sha256(file_path):
 def download_binary(base_url, sha, binary_name, attempt=3):
   full_url = '{0}/{1}/{2}'.format(base_url, sha, binary_name)
   try:
-    temp_path = download_to_temp_dir(full_url, filename=binary_name, sha=sha)
-    return temp_path
+    return download_to_temp_dir(full_url, filename=binary_name, sha=sha)
   except Exception as e:
     if attempt == 1:
        raise e
@@ -117,7 +115,7 @@ def validate_sha(file_path, sha):
 def download_to_temp_dir(url, filename, sha):
   download_dir = tempdir(prefix='electron-')
   file_path = os.path.join(download_dir, filename)
-  download(text='Download ' + filename, url=url, path=file_path)
+  download(text=f'Download {filename}', url=url, path=file_path)
   validate_sha(file_path, sha)
   return file_path
 

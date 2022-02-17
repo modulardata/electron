@@ -18,9 +18,7 @@ def is_repo_root(path):
     return False
 
   git_folder_path = os.path.join(path, '.git')
-  git_folder_exists = os.path.exists(git_folder_path)
-
-  return git_folder_exists
+  return os.path.exists(git_folder_path)
 
 
 def get_repo_root(path):
@@ -55,9 +53,9 @@ def am(repo, patch_data, threeway=False, directory=None, exclude=None,
 
   root_args = ['-C', repo]
   if committer_name is not None:
-    root_args += ['-c', 'user.name=' + committer_name]
+    root_args += ['-c', f'user.name={committer_name}']
   if committer_email is not None:
-    root_args += ['-c', 'user.email=' + committer_email]
+    root_args += ['-c', f'user.email={committer_email}']
   root_args += ['-c', 'commit.gpgsign=false']
   command = ['git'] + root_args + ['am'] + args
   proc = subprocess.Popen(
@@ -84,8 +82,7 @@ def apply_patch(repo, patch_path, directory=None, index=False, reverse=False):
   args += ['--', patch_path]
 
   return_code = subprocess.call(args)
-  applied_successfully = (return_code == 0)
-  return applied_successfully
+  return (return_code == 0)
 
 
 def import_patches(repo, **kwargs):
@@ -142,8 +139,7 @@ def commit(repo, author, message):
           ]
 
   return_code = subprocess.call(args, env=env)
-  committed_successfully = (return_code == 0)
-  return committed_successfully
+  return (return_code == 0)
 
 def get_upstream_head(repo):
   args = [
@@ -171,7 +167,7 @@ def guess_base_commit(repo):
   """Guess which commit the patches might be based on"""
   try:
     upstream_head = get_upstream_head(repo)
-    num_commits = get_commit_count(repo, upstream_head + '..')
+    num_commits = get_commit_count(repo, f'{upstream_head}..')
     return [upstream_head, num_commits]
   except subprocess.CalledProcessError:
     args = [
@@ -181,7 +177,7 @@ def guess_base_commit(repo):
       'describe',
       '--tags',
     ]
-    return subprocess.check_output(args).rsplit('-', 2)[0:2]
+    return subprocess.check_output(args).rsplit('-', 2)[:2]
 
 
 def format_patch(repo, since):
@@ -253,9 +249,8 @@ def remove_patch_filename(patch):
   for i, l in enumerate(patch):
     is_patchfilename = l.startswith('Patch-Filename: ')
     next_is_patchfilename = i < len(patch) - 1 and patch[i+1].startswith('Patch-Filename: ')
-    if not force_keep_next_line and (is_patchfilename or (next_is_patchfilename and len(l.rstrip()) == 0)):
-      pass # drop this line
-    else:
+    if (force_keep_next_line or not is_patchfilename and
+        (not next_is_patchfilename or len(l.rstrip()) != 0)):
       yield l
     force_keep_next_line = l.startswith('Subject: ')
 
