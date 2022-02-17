@@ -16,10 +16,7 @@ def main(args):
     try:
       os.makedirs(dirname)
     except OSError as e:
-      if e.errno == os.errno.EEXIST:
-        # It's OK if it already exists
-        pass
-      else:
+      if e.errno != os.errno.EEXIST:
         raise
 
 

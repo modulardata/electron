@@ -56,9 +56,7 @@ def scoped_cwd(path):
 
 @contextlib.contextmanager
 def scoped_env(key, value):
-  origin = ''
-  if key in os.environ:
-    origin = os.environ[key]
+  origin = os.environ[key] if key in os.environ else ''
   os.environ[key] = value
   try:
     yield
@@ -197,7 +195,7 @@ def get_electron_version():
   SOURCE_ROOT = os.path.abspath(os.path.join(__file__, '..', '..', '..'))
   version_file = os.path.join(SOURCE_ROOT, 'ELECTRON_VERSION')
   with open(version_file) as f:
-    return 'v' + f.read().strip()
+    return f'v{f.read().strip()}'
 
 def boto_path_dirs():
   return [
@@ -232,10 +230,8 @@ def add_exec_bit(filename):
   os.chmod(filename, os.stat(filename).st_mode | stat.S_IEXEC)
 
 def get_out_dir():
-  out_dir = 'Debug'
   override = os.environ.get('ELECTRON_OUT_DIR')
-  if override is not None:
-    out_dir = override
+  out_dir = override if override is not None else 'Debug'
   return os.path.join(SRC_DIR, 'out', out_dir)
 
 # NOTE: This path is not created by gn, it is used as a scratch zone by our

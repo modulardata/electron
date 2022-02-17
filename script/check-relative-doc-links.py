@@ -18,21 +18,16 @@ def main():
   try:
     for root, dirs, files in os.walk(DOCS_DIR):
       totalDirs += len(dirs)
-      for f in files:
-        if f.endswith('.md'):
-          filepaths.append(os.path.join(root, f))
+      filepaths.extend(os.path.join(root, f) for f in files if f.endswith('.md'))
   except KeyboardInterrupt:
     print('Keyboard interruption. Please try again.')
     return
 
-  totalBrokenLinks = 0
-  for path in filepaths:
-    totalBrokenLinks += getBrokenLinks(path)
-
-  print('Parsed through ' + str(len(filepaths)) +
-        ' files within docs directory and its ' +
-        str(totalDirs) + ' subdirectories.')
-  print('Found ' + str(totalBrokenLinks) + ' broken relative links.')
+  totalBrokenLinks = sum(getBrokenLinks(path) for path in filepaths)
+  print(((f'Parsed through {len(filepaths)}' +
+          ' files within docs directory and its ') + str(totalDirs) +
+         ' subdirectories.'))
+  print(f'Found {str(totalBrokenLinks)} broken relative links.')
   return totalBrokenLinks
 
 
@@ -51,8 +46,7 @@ def getBrokenLinks(filepath):
   regexLink = re.compile('\[(.*?)\]\((?P<links>(.*?))\)')
   links = []
   for line in lines:
-    matchLinks = regexLink.search(line)
-    if matchLinks:
+    if matchLinks := regexLink.search(line):
       relativeLink = matchLinks.group('links')
       if not str(relativeLink).startswith('http'):
         links.append(relativeLink)
@@ -90,17 +84,16 @@ def checkSections(sections, lines):
   sectionHeader = sections[1].replace('-', '')
   regexSectionTitle = re.compile('# (?P<header>.*)')
   for line in lines:
-    matchHeader = regexSectionTitle.search(line)
-    if matchHeader:
-     matchHeader = filter(str.isalnum, str(matchHeader.group('header')))
-     if matchHeader.lower() == sectionHeader:
-      return True
+    if matchHeader := regexSectionTitle.search(line):
+      matchHeader = filter(str.isalnum, str(matchHeader.group('header')))
+      if matchHeader.lower() == sectionHeader:
+       return True
   return False
 
 
 def print_errors(filepath, brokenLink):
   if brokenLink:
-    print("File Location: " + filepath)
+    print(f'File Location: {filepath}')
     for link in brokenLink:
       print("\tBroken links: " + link)
 

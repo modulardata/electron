@@ -18,22 +18,18 @@ def main():
   try:
     for root, dirs, files in os.walk(DOCS_DIR):
       totalDirs += len(dirs)
-      for f in files:
-        if f.endswith('.md'):
-          filepaths.append(os.path.join(root, f))
+      filepaths.extend(os.path.join(root, f) for f in files if f.endswith('.md'))
   except KeyboardInterrupt:
     print('Keyboard interruption. Please try again.')
     return
 
-  trailingWhiteSpaceFiles = 0
-  for path in filepaths:
-    trailingWhiteSpaceFiles += hasTrailingWhiteSpace(path, args.fix)
-
-  print('Parsed through ' + str(len(filepaths)) +
-        ' files within docs directory and its ' +
-        str(totalDirs) + ' subdirectories.')
-  print('Found ' + str(trailingWhiteSpaceFiles) +
-        ' files with trailing whitespace.')
+  trailingWhiteSpaceFiles = sum(
+      hasTrailingWhiteSpace(path, args.fix) for path in filepaths)
+  print(((f'Parsed through {len(filepaths)}' +
+          ' files within docs directory and its ') + str(totalDirs) +
+         ' subdirectories.'))
+  print((f'Found {str(trailingWhiteSpaceFiles)}' +
+         ' files with trailing whitespace.'))
   return trailingWhiteSpaceFiles
 
 def hasTrailingWhiteSpace(filepath, fix):

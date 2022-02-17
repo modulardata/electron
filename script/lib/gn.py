@@ -11,10 +11,7 @@ class GNProject:
     self.out_dir = out_dir
 
   def _get_executable_name(self):
-    if sys.platform == 'win32':
-      return 'gn.bat'
-
-    return 'gn'
+    return 'gn.bat' if sys.platform == 'win32' else 'gn'
 
   def run(self, command_name, command_args):
     with scoped_cwd(self.out_dir):
@@ -41,16 +38,13 @@ class GNArgs:
     # E.g. ['version', '"1.0.0"']
     name_and_raw_value = name_with_raw_value.split(' = ')
 
-    raw_value = name_and_raw_value[1]
-    return raw_value
+    return name_and_raw_value[1]
 
   def get_string(self, name):
     # Expects to get a string in double quotes, e.g. '"some_value"'.
     raw_value = self._get_raw_value(name)
 
-    # E.g. 'some_value' (without enclosing quotes).
-    value = raw_value[1:-1]
-    return value
+    return raw_value[1:-1]
 
   def get_boolean(self, name):
     # Expects to get a 'true' or a 'false' string.
